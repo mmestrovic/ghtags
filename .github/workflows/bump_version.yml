@@ -45,6 +45,9 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: main, master
+          pre_release_branches: develop
+          default_bump: minor
           
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
