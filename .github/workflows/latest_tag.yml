@@ -27,7 +27,7 @@ jobs:
                 echo "env_name=prod" >> $GITHUB_OUTPUT
                 echo "deploy_branch=main" >> $GITHUB_OUTPUT
               elif [ "${{ inputs.environment }}" = "staging" ]; then
-                echo "env_name=staging" >> $GITHUB_OUTPUT
+                echo "env_name=stg" >> $GITHUB_OUTPUT
                 echo "deploy_branch=release" >> $GITHUB_OUTPUT
               elif [ "${{ inputs.environment }}" = "qa" ]; then
                 echo "env_name=qa" >> $GITHUB_OUTPUT
