@@ -56,12 +56,18 @@ jobs:
       env_name: ${{ steps.branch_check.outputs.env_name }}
 
   check_tag:
-      if: ${{ contains(inputs.deployment, 'latest') }}
-      runs-on: ubuntu-latest
-      steps:
-        - name: Check tag select
-          id: check_tag_select
-          run: |
-            echo "${{ github.event.inputs.custom_tag }} ${{ fromJSON('["", "🥳"]')[github.event.inputs.deployment == 'latest'] }} `Custom tag:` ${{ github.event.inputs.custom_tag }}"
+    if: ${{ contains(inputs.deployment, 'latest') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check tag select
+        id: check_tag_select
+        run: |
+          echo "${{ github.event.inputs.environment }} ${{ fromJSON('["", "🥳"]')[github.event.inputs.deployment == 'latest'] }} ${{ github.event.inputs.custom_tag }}"
             
-  
+  check_if_custom_tag:
+    if: ${{ contains(inputs.deployment, 'custom' )}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print custom tag
+        run: |
+          echo ${{ inputs.custom_tag }}
