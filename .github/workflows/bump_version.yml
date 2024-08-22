@@ -62,7 +62,13 @@ jobs:
         run: |
           echo "Running on branch ${{ github.ref }}"
           if [ "${{ github.ref }}" = "refs/heads/master" ] || [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "image_tag=release-${{ steps.tag_version.outputs.new_tag }}" >> $GITHUB_OUTPUT
+            echo "image_tag=prod-${{ steps.tag_version.outputs.new_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "image_tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "image_tag=${{ needs.env_check.outputs.env_name }}-${{ steps.tag_version.outputs.new_tag }}" >> $GITHUB_OUTPUT
           fi
+
+      - name: Print tag
+        id: print_tag
+        shell: bash
+        run: |
+          echo ${{ env.image_tag }}
