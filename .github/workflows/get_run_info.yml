@@ -27,6 +27,9 @@ on:
             - qa
             - staging
 
+env:
+  DEPLOY_TYPE: ""
+  
 jobs:
   env_check:
     runs-on: ubuntu-latest
@@ -54,18 +57,22 @@ jobs:
 
       - name: Set deployment type
         id: deploy_type
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
         shell: bash
         run: |
-          if [ ${{ startsWith(github.ref, 'refs/tags') }} ]
-          then
-            echo "tags"
-          fi
-          if [ ${{ startsWith(github.ref, 'refs/heads') }} ]
-          then
-            echo "heads"
-          fi
+          echo "DEPLOY_TYPE=tags" >> $GITHUB_OUTPUT
 
     
     outputs:
       env_name: ${{ steps.branch_check.outputs.env_name }}
 
+
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug
+        id: debug
+        shell: bash
+        run: |
+          set -e
+          echo "${{ env.DEPLOY_TYPE }}"
