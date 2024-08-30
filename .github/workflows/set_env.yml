@@ -6,6 +6,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
+    - name: Branch check
+      id: branch_check
+      run: |
+        echo "Running on branch ${{ github.ref }}"
+
     - uses: actions/checkout@v2
     - name: Set GITHUB_SHA_SHORT
       run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
