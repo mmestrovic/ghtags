@@ -83,8 +83,8 @@ jobs:
               exit 1
             fi
 
-        - name: This runs on prod3
-          if: ${{ github.ref == 'refs/heads/prod3' }}
+        - name: This runs on demo3
+          if: ${{ github.ref == 'refs/heads/demo3' }}
           shell: bash
           run: |
             echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}
