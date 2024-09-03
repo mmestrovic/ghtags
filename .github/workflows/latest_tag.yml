@@ -56,7 +56,7 @@ jobs:
         - name: Get env name from $GITHUB_ENV
           shell: bash
           run: |
-            echo $ENV_NAME
+            echo ${{ env.ENV_NAME }}
 
         - name: Abort deployment on wrongly selected env/tag for Prod
           if: ${{ needs.env_check.outputs.env_name == 'prod' }}
