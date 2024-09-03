@@ -53,6 +53,21 @@ jobs:
       needs: env_check
       steps:
 
+        - name: Set and Retrieve Github ENV variables
+          shell: bash
+          run: |
+    
+            # define variables      
+            tests=16
+            failures=2
+      
+            # set them as GitHub ENV variables
+            echo "Tests=$tests" >> $GITHUB_ENV
+            echo "Failures=$failures" >> $GITHUB_ENV
+      
+            # retrieve these GitHub ENV variables
+            echo "${{ env.Failures }} out of ${{ env.Tests }} tests failed on CI"
+
         - name: Get env name from $GITHUB_ENV
           shell: bash
           run: |
