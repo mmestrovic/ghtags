@@ -54,11 +54,11 @@ jobs:
           run: |
             echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
 
-            if [[ !${{ github.ref == 'refs/heads/main' }} ]]
+            if [[ ${{ github.ref == 'refs/heads/main' }} ]]
             then
-              echo "Not running on main"
-            else
               echo "Running on main"
+            else
+              echo "Not running on main"
             fi
 
         - name: Abort deployment on wrongly selected env/tag for QA
