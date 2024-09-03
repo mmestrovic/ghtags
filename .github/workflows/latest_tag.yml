@@ -52,9 +52,11 @@ jobs:
           if: ${{ needs.env_check.outputs.env_name == 'prod' }}
           shell: bash
           run: |
-            if [ !${{ github.ref == 'refs/heads/main' }} ]; then
+            if [[ !${{ github.ref == 'refs/heads/main' }} ]]; then
               echo "This workflow is only supported on the main branch."
               exit 1
+            else
+              echo "Env prod, branch not main"
             fi 
 
         - name: Abort deployment on wrongly selected env/tag for QA
