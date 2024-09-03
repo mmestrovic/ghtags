@@ -45,35 +45,39 @@ jobs:
 
     deployment_check:
       name: Deployment check
-      runs-on: self-hosted
+      runs-on: ubuntu-latest
       needs: env_check
       steps:
         - name: Abort deployment on wrongly selected env/tag for Prod
           if: ${{ needs.env_check.outputs.env_name == 'prod' }}
+          shell: bash
           run: |
-            if [ ${{ startsWith(github.ref_name, 'main') }} ]; then
-              echo "This workflow is only supported on the prod tags."
+            if [ !${{ github.ref == 'refs/heads/main' }} ]; then
+              echo "This workflow is only supported on the main branch."
               exit 1
-              fi 
+            fi 
 
         - name: Abort deployment on wrongly selected env/tag for QA
           if: ${{ needs.env_check.outputs.env_name == 'qa' }}
+          shell: bash
           run: |
-            if [ ${{ startsWith(github.ref_name, 'demo') }} ]; then
-              echo "This workflow is only supported on the demo branches.
+            if [ ${{ !startsWith(github.ref_name, 'demo') }} ]; then
+              echo "This workflow is only supported on the demo branches."
               exit 1
-              fi 
+            fi 
+
         - name: Abort deployment on wrongly selected env/tag for Staging
           if: ${{ needs.env_check.outputs.env_name == 'staging' }}
+          shell: bash
           run: |
-            if [ ${{ startsWith(github.ref_name, 'release') }} ]; then
+            if [ ${{ !startsWith(github.ref_name, 'release') }} ]; then
               echo "This workflow is only supported on the staging tags."
               exit 1
             fi
 
     get_last_tag:
         runs-on: ubuntu-latest
-        needs: env_check
+        needs: [deployment_check,env_check]
         permissions:
             contents: write
         steps:
