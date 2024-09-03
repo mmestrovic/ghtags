@@ -87,7 +87,7 @@ jobs:
           if: ${{ github.ref == 'refs/heads/demo3' }}
           shell: bash
           run: |
-            echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}
+            echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
 
     get_last_tag:
         runs-on: ubuntu-latest
