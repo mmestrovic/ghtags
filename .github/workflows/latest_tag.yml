@@ -94,6 +94,16 @@ jobs:
           shell: bash
           run: |
             echo "Running on demo branches:  ${{ github.ref }} - ${{ github.ref_name }}"
+
+            if [ ${{ needs.env_check.outputs.env_name == 'qa' }} ]
+            then
+              echo "running on qa from demo"
+            else
+              echo "error"
+            fi
+
+
+
     get_last_tag:
         runs-on: ubuntu-latest
         needs: [deployment_check,env_check]
