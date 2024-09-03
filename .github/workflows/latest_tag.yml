@@ -62,7 +62,7 @@ jobs:
           shell: bash
           run: |
             if [ ${{ startsWith(github.ref_name, 'demo') }} ]; then
-              echo "This workflow is only supported on the demo branches.
+              echo "This workflow is only supported on the demo branches."
               exit 1
               fi 
         - name: Abort deployment on wrongly selected env/tag for Staging
