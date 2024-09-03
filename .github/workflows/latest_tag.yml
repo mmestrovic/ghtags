@@ -54,12 +54,12 @@ jobs:
           run: |
             echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
 
-            if [[ !${{ github.ref == 'refs/heads/main' }} ]]; then
-              echo "This workflow is only supported on the main branch."
-              exit 1
+            if [[ !${{ github.ref == 'refs/heads/main' }} ]]
+            then
+              echo "Not running on main"
             else
-              echo "Env prod, branch not main"
-            fi 
+              echo "Running on main"
+            fi
 
         - name: Abort deployment on wrongly selected env/tag for QA
           if: ${{ needs.env_check.outputs.env_name == 'qa' }}
@@ -77,7 +77,7 @@ jobs:
           shell: bash
           run: |
             echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
-            
+
             if [ ${{ !startsWith(github.ref_name, 'release') }} ]; then
               echo "This workflow is only supported on the staging tags."
               exit 1
