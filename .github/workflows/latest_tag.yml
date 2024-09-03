@@ -52,10 +52,10 @@ jobs:
           if: ${{ needs.env_check.outputs.env_name == 'prod' }}
           shell: bash
           run: |
-            if [ ${{ !startsWith(github.ref_name, 'main') }} ]; then
-              echo "This workflow is only supported on the prod tags."
+            if [ !${{ github.ref == 'refs/heads/main' }} ]; then
+              echo "This workflow is only supported on the main branch."
               exit 1
-              fi 
+            fi 
 
         - name: Abort deployment on wrongly selected env/tag for QA
           if: ${{ needs.env_check.outputs.env_name == 'qa' }}
@@ -64,7 +64,8 @@ jobs:
             if [ ${{ !startsWith(github.ref_name, 'demo') }} ]; then
               echo "This workflow is only supported on the demo branches."
               exit 1
-              fi 
+            fi 
+
         - name: Abort deployment on wrongly selected env/tag for Staging
           if: ${{ needs.env_check.outputs.env_name == 'staging' }}
           shell: bash
