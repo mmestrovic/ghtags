@@ -25,19 +25,19 @@ jobs:
               
               if [ "${{ inputs.environment }}" = "prod" ]; then
                 echo "env_name=prod" >> $GITHUB_OUTPUT
-                echo "ENV_NAME=prod" >> $GITHUB_ENV
+                echo "ENVNAME=prod" >> $GITHUB_ENV
                 echo "deploy_branch=main" >> $GITHUB_OUTPUT
               elif [ "${{ inputs.environment }}" = "staging" ]; then
                 echo "env_name=staging" >> $GITHUB_OUTPUT
-                echo "ENV_NAME=staging" >> $GITHUB_ENV
+                echo "ENVNAME=staging" >> $GITHUB_ENV
                 echo "deploy_branch=release" >> $GITHUB_OUTPUT
               elif [ "${{ inputs.environment }}" = "qa" ]; then
                 echo "env_name=qa" >> $GITHUB_OUTPUT
-                echo "ENV_NAME=qa" >> $GITHUB_ENV
+                echo "ENVNAME=qa" >> $GITHUB_ENV
                 echo "deploy_branch=develop" >> $GITHUB_OUTPUT
               else
                 echo "env_name=undefined" >> $GITHUB_OUTPUT
-                echo "ENV_NAME=undefined" >> $GITHUB_ENV
+                echo "ENVNAME=undefined" >> $GITHUB_ENV
                 echo "deploy_branch=undefined" >> $GITHUB_OUTPUT
               fi                  
           - name: Use environment setup in previous step
@@ -53,7 +53,7 @@ jobs:
       needs: env_check
       steps:
 
-        - name: Set and Retrieve Github ENV variables
+        - name: Set Github ENV variables
           shell: bash
           run: |
     
@@ -64,14 +64,17 @@ jobs:
             # set them as GitHub ENV variables
             echo "Tests=$tests" >> $GITHUB_ENV
             echo "Failures=$failures" >> $GITHUB_ENV
-      
+
+        - name: Retrieve Github ENV variables
+          shell: bash
+          run: |      
             # retrieve these GitHub ENV variables
             echo "${{ env.Failures }} out of ${{ env.Tests }} tests failed on CI"
 
         - name: Get env name from $GITHUB_ENV
           shell: bash
           run: |
-            echo ${{ env.ENV_NAME }}
+            echo ${{ env.ENVNAME }}
 
         - name: Abort deployment on wrongly selected env/tag for Prod
           if: ${{ needs.env_check.outputs.env_name == 'prod' }}
