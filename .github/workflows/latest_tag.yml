@@ -25,16 +25,20 @@ jobs:
               
               if [ "${{ inputs.environment }}" = "prod" ]; then
                 echo "env_name=prod" >> $GITHUB_OUTPUT
+                echo "ENV_NAME=prod" >> $GITHUB_ENV
                 echo "deploy_branch=main" >> $GITHUB_OUTPUT
               elif [ "${{ inputs.environment }}" = "staging" ]; then
-                echo "env_name=stg" >> $GITHUB_OUTPUT
+                echo "env_name=staging" >> $GITHUB_OUTPUT
+                echo "ENV_NAME=staging" >> $GITHUB_ENV
                 echo "deploy_branch=release" >> $GITHUB_OUTPUT
               elif [ "${{ inputs.environment }}" = "qa" ]; then
                 echo "env_name=qa" >> $GITHUB_OUTPUT
+                echo "ENV_NAME=qa" >> $GITHUB_ENV
                 echo "deploy_branch=develop" >> $GITHUB_OUTPUT
               else
-                echo "env_name=dev" >> $GITHUB_OUTPUT
-                echo "deploy_branch=develop" >> $GITHUB_OUTPUT
+                echo "env_name=undefined" >> $GITHUB_OUTPUT
+                echo "ENV_NAME=undefined" >> $GITHUB_ENV
+                echo "deploy_branch=undefined" >> $GITHUB_OUTPUT
               fi                  
           - name: Use environment setup in previous step
             run: echo "Setting up environment ${{ steps.branch_check.outputs.env_name }}"
@@ -48,6 +52,12 @@ jobs:
       runs-on: ubuntu-latest
       needs: env_check
       steps:
+
+        - name: Get env name from $GITHUB_ENV
+          shell: bash
+          run: |
+            echo $ENV_NAME
+
         - name: Abort deployment on wrongly selected env/tag for Prod
           if: ${{ needs.env_check.outputs.env_name == 'prod' }}
           shell: bash
@@ -84,7 +94,7 @@ jobs:
             fi
 
         - name: This runs on demo3
-          if: ${{ github.ref == 'refs/heads/demo3' }}
+          if: ${{ github.ref == 'refs/heads/main' }}
           shell: bash
           run: |
             echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
