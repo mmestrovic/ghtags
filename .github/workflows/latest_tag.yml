@@ -52,6 +52,8 @@ jobs:
           if: ${{ needs.env_check.outputs.env_name == 'prod' }}
           shell: bash
           run: |
+            echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
+
             if [[ !${{ github.ref == 'refs/heads/main' }} ]]; then
               echo "This workflow is only supported on the main branch."
               exit 1
@@ -63,6 +65,8 @@ jobs:
           if: ${{ needs.env_check.outputs.env_name == 'qa' }}
           shell: bash
           run: |
+            echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
+
             if [ ${{ !startsWith(github.ref_name, 'demo') }} ]; then
               echo "This workflow is only supported on the demo branches."
               exit 1
@@ -72,6 +76,8 @@ jobs:
           if: ${{ needs.env_check.outputs.env_name == 'staging' }}
           shell: bash
           run: |
+            echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
+            
             if [ ${{ !startsWith(github.ref_name, 'release') }} ]; then
               echo "This workflow is only supported on the staging tags."
               exit 1
