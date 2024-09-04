@@ -1,0 +1,19 @@
+name: Get file hash
+
+on:
+  workflow_dispatch:
+
+jobs:
+    get_hash:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Get file hash
+              run: |
+                wget https://raw.githubusercontent.com/mmestrovic/ghtags/main/README.md
+                
+                echo "GITHUB_SHA_SHORT=$(sha256sum README.md | awk '{print $1}')" >> $GITHUB_ENV
+            
+            - name: Print hash from env
+              run: |
+                echo ${{ env.GITHUB_SHA_SHORT }}
+

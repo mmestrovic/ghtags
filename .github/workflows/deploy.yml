@@ -1,0 +1,73 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+        deployment:
+            description: Select a tag
+            type: choice
+            required: true
+            default: "latest"
+            options:
+              - latest
+              - custom
+
+        custom_tag:
+            description: Custom tag
+            type: string
+            required: false
+
+        environment:
+          description: Select an environment
+          type: choice
+          required: true
+          default: ""
+          options:
+            - prod
+            - qa
+            - staging
+
+jobs:
+  env_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Environment check on branch
+        id: branch_check
+        run: |
+          echo "Running on branch ${{ github.ref }}"
+          
+          if [ "${{ inputs.environment }}" = "prod" ]; then
+            echo "env_name=prod" >> $GITHUB_OUTPUT
+            echo "deploy_branch=main" >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.environment }}" = "staging" ]; then
+            echo "env_name=stg" >> $GITHUB_OUTPUT
+            echo "deploy_branch=release" >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.environment }}" = "qa" ]; then
+            echo "env_name=qa" >> $GITHUB_OUTPUT
+            echo "deploy_branch=develop" >> $GITHUB_OUTPUT
+          else
+            echo "env_name=dev" >> $GITHUB_OUTPUT
+            echo "deploy_branch=develop" >> $GITHUB_OUTPUT
+          fi                  
+      - name: Use environment setup in previous step
+        run: echo "Setting up environment ${{ steps.branch_check.outputs.env_name }}"
+
+    outputs:
+      env_name: ${{ steps.branch_check.outputs.env_name }}
+
+  check_tag:
+    if: ${{ contains(inputs.deployment, 'latest') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check tag select
+        id: check_tag_select
+        run: |
+          echo "${{ github.event.inputs.environment }} ${{ fromJSON('["", "🥳"]')[github.event.inputs.deployment == 'latest'] }} ${{ github.event.inputs.custom_tag }}"
+            
+  check_if_custom_tag:
+    if: ${{ contains(inputs.deployment, 'custom' )}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print custom tag
+        run: |
+          echo ${{ inputs.custom_tag }}
