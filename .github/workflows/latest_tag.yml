@@ -67,7 +67,7 @@ jobs:
             echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
             echo "Env: ${{ needs.env_check.outputs.env_name }}"
 
-            if [ ${{ needs.env_check.outputs.env_name == 'qa' }} ]
+            if [ ${{ needs.env_check.outputs.env_name }} = 'qa' ]
             then
               echo "OK: Running on QA from demo"
             else
