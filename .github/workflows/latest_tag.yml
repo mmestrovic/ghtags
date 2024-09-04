@@ -53,64 +53,6 @@ jobs:
       needs: env_check
       steps:
 
-        - name: Set Github ENV variables
-          shell: bash
-          run: |
-    
-            # define variables      
-            tests=16
-            failures=2
-      
-            # set them as GitHub ENV variables
-            echo "Tests=$tests" >> $GITHUB_ENV
-            echo "Failures=$failures" >> $GITHUB_ENV
-
-        - name: Retrieve Github ENV variables
-          shell: bash
-          run: |      
-            # retrieve these GitHub ENV variables
-            echo "${{ env.Failures }} out of ${{ env.Tests }} tests failed on CI"
-
-        - name: Get env name from $GITHUB_ENV
-          shell: bash
-          run: |
-            echo ${{ env.ENVNAME }}
-
-        - name: Abort deployment on wrongly selected env/tag for Prod
-          if: ${{ needs.env_check.outputs.env_name == 'prod' }}
-          shell: bash
-          run: |
-            echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
-
-            if [[ ${{ github.ref == 'refs/heads/main' }} ]]
-            then
-              echo "Running on main"
-            else
-              echo "Not running on main"
-            fi
-
-        - name: Abort deployment on wrongly selected env/tag for QA
-          if: ${{ needs.env_check.outputs.env_name == 'qa' }}
-          shell: bash
-          run: |
-            echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
-
-            if [ ${{ !startsWith(github.ref_name, 'demo') }} ]; then
-              echo "This workflow is only supported on the demo branches."
-              exit 1
-            fi 
-
-        - name: Abort deployment on wrongly selected env/tag for Staging
-          if: ${{ needs.env_check.outputs.env_name == 'staging' }}
-          shell: bash
-          run: |
-            echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
-
-            if [ ${{ !startsWith(github.ref_name, 'release') }} ]; then
-              echo "This workflow is only supported on the staging tags."
-              exit 1
-            fi
-
         - name: This runs on demo3
           if: ${{ github.ref == 'refs/heads/main' }}
           shell: bash
@@ -125,12 +67,10 @@ jobs:
 
             if [ ${{ needs.env_check.outputs.env_name == 'qa' }} ]
             then
-              echo "running on qa from demo"
+              echo "OK: Running on QA from demo"
             else
-              echo "error"
+              echo "Error: This deployment supported only on QA."
             fi
-
-
 
     get_last_tag:
         runs-on: ubuntu-latest
