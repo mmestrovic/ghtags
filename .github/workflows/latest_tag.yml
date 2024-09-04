@@ -53,16 +53,51 @@ jobs:
       needs: env_check
       steps:
 
-        - name: This runs on demo3
+        - name: This runs on main
           if: ${{ github.ref == 'refs/heads/main' }}
           shell: bash
           run: |
             echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
 
-        - name: This runs on demo branches
-          if: ${{ startsWith(github.ref, 'refs/heads/demo') }}
+          - name: This runs on main branch
+          if: ${{ startsWith(github.ref, 'refs/heads/main') }}
           shell: bash
           run: |
+            set -e
+            echo "Running params:"
+            echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
+            echo "Env: ${{ needs.env_check.outputs.env_name }}"
+
+            if [ ${{ needs.env_check.outputs.env_name }} = 'prod' ]
+            then
+              echo "OK: Running on Prod from demo"
+            else
+              echo "Error: This deployment is supported only on Prod."
+              exit 1
+            fi
+
+          - name: This runs on release branche
+          if: ${{ startsWith(github.ref, 'refs/heads/release') }}
+          shell: bash
+          run: |
+            set -e
+            echo "Running params:"
+            echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
+            echo "Env: ${{ needs.env_check.outputs.env_name }}"
+
+            if [ ${{ needs.env_check.outputs.env_name }} = 'staging' ]
+            then
+              echo "OK: Running on Staging from demo"
+            else
+              echo "Error: This deployment is supported only on Staging."
+              exit 1
+            fi
+
+          - name: This runs on develop branch
+          if: ${{ startsWith(github.ref, 'refs/heads/develop') }}
+          shell: bash
+          run: |
+            set -e
             echo "Running params:"
             echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
             echo "Env: ${{ needs.env_check.outputs.env_name }}"
@@ -71,7 +106,26 @@ jobs:
             then
               echo "OK: Running on QA from demo"
             else
-              echo "Error: This deployment supported only on QA."
+              echo "Error: This deployment is supported only on QA."
+              exit 1
+              
+                
+
+        - name: This runs on demo branches
+          if: ${{ startsWith(github.ref, 'refs/heads/demo') }}
+          shell: bash
+          run: |
+            set -e
+            echo "Running params:"
+            echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
+            echo "Env: ${{ needs.env_check.outputs.env_name }}"
+
+            if [ ${{ needs.env_check.outputs.env_name }} = 'qa' ]
+            then
+              echo "OK: Running on QA from demo"
+            else
+              echo "Error: This deployment is supported only on QA."
+              exit 1
             fi
 
     get_last_tag:
