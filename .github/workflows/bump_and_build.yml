@@ -1,4 +1,4 @@
-name: Bump version
+name: Bump and build
 
 on:
   push:
@@ -7,9 +7,14 @@ on:
       - develop
       - release
 
+env:
+  BUILD_RELEASE_DIR: "./release/"
+  NETCORE_VERSION: "6.0.x"
+
 jobs:
 
   env_check:
+    name: Environment check
     runs-on: ubuntu-latest
     steps:
       - name: Environment check on branch
@@ -19,7 +24,7 @@ jobs:
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             echo "env_name=prod" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/release" ]; then
-            echo "env_name=staging" >> $GITHUB_OUTPUT
+            echo "env_name=stg" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
             echo "env_name=qa" >> $GITHUB_OUTPUT
           else
@@ -32,7 +37,8 @@ jobs:
     outputs:
       env_name: ${{ steps.branch_check.outputs.env_name }}
  
-  build:
+  create_tag:
+    name: Create tag
     runs-on: ubuntu-latest
     needs: env_check
     permissions:
@@ -50,25 +56,74 @@ jobs:
           default_bump: minor
           
       - name: Create a GitHub release
+        id: create_release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.env_check.outputs.env_name }}-${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ needs.env_check.outputs.env_name }}-${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
 
-      - name: image_tag
+      - name: Create image tag
         id: image_tag
         shell: bash
         run: |
           echo "Running on branch ${{ github.ref }}"
           if [ "${{ github.ref }}" = "refs/heads/master" ] || [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "image_tag=prod-${{ steps.tag_version.outputs.new_tag }}" >> $GITHUB_OUTPUT
+            echo "image_tag=release-${{ steps.tag_version.outputs.new_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "image_tag=${{ needs.env_check.outputs.env_name }}-${{ steps.tag_version.outputs.new_tag }}" >> $GITHUB_OUTPUT
+            echo "image_tag=${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Print tag
-        id: print_tag
-        shell: bash
+  get_last_tag:
+    name: Get last tag
+    runs-on: ubuntu-latest
+    needs: [env_check,create_tag]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get latest staging tag
+        uses: rmeneely/git-last-tag@v1
+        with:
+          tag_pattern: '${{ needs.env_check.outputs.env_name }}-v[0-9]*.[0-9]*.[0-9]*'
+                
+      - name: Print latest tag
         run: |
-          echo ${{ env.image_tag }}
+          echo ${{ env.LAST_TAG }}
+
+      - name: Set tag output
+        id: tag_output
+        run: |
+          echo "latest_tag=${{ env.LAST_TAG }}" >> $GITHUB_OUTPUT
+  
+    outputs:
+      latest_tag: ${{ steps.tag_output.outputs.latest_tag }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: get_last_tag
+    permissions:
+      contents: write
+    steps:
+
+      - name: Print latest tag
+        run: |
+          echo ${{ needs.get_last_tag.outputs.latest_tag }}
+          echo "---"
+          echo $GITHUB_OUTPUT
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.get_last_tag.outputs.latest_tag }}
+          
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: "6.0.x"
+                  
+      - name: Show dotnet version
+        run: dotnet --version
+
+      - name: Show git status
+        run: git status

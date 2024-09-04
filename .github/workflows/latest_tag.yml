@@ -1,0 +1,145 @@
+name: Get latest tag
+
+on:
+  workflow_dispatch:
+    inputs:
+        environment:
+          description: Select an environment
+          type: choice
+          required: true
+          default: ""
+          options:
+            - prod
+            - qa
+            - staging
+
+jobs:
+
+    env_check:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Environment check on branch
+            id: branch_check
+            run: |
+              echo "Running on branch ${{ github.ref }}"
+              
+              if [ "${{ inputs.environment }}" = "prod" ]; then
+                echo "env_name=prod" >> $GITHUB_OUTPUT
+                echo "ENVNAME=prod" >> $GITHUB_ENV
+                echo "deploy_branch=main" >> $GITHUB_OUTPUT
+              elif [ "${{ inputs.environment }}" = "staging" ]; then
+                echo "env_name=staging" >> $GITHUB_OUTPUT
+                echo "ENVNAME=staging" >> $GITHUB_ENV
+                echo "deploy_branch=release" >> $GITHUB_OUTPUT
+              elif [ "${{ inputs.environment }}" = "qa" ]; then
+                echo "env_name=qa" >> $GITHUB_OUTPUT
+                echo "ENVNAME=qa" >> $GITHUB_ENV
+                echo "deploy_branch=develop" >> $GITHUB_OUTPUT
+              else
+                echo "env_name=undefined" >> $GITHUB_OUTPUT
+                echo "ENVNAME=undefined" >> $GITHUB_ENV
+                echo "deploy_branch=undefined" >> $GITHUB_OUTPUT
+              fi                  
+          - name: Use environment setup in previous step
+            run: echo "Setting up environment ${{ steps.branch_check.outputs.env_name }}"
+    
+        outputs:
+          env_name: ${{ steps.branch_check.outputs.env_name }}
+
+
+    deployment_check:
+      name: Deployment check
+      runs-on: ubuntu-latest
+      needs: env_check
+      steps:
+
+        - name: This runs on main
+          if: ${{ github.ref == 'refs/heads/main' }}
+          shell: bash
+          run: |
+            echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
+
+          - name: This runs on main branch
+          if: ${{ startsWith(github.ref, 'refs/heads/main') }}
+          shell: bash
+          run: |
+            set -e
+            echo "Running params:"
+            echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
+            echo "Env: ${{ needs.env_check.outputs.env_name }}"
+
+            if [ ${{ needs.env_check.outputs.env_name }} = 'prod' ]
+            then
+              echo "OK: Running on Prod from demo"
+            else
+              echo "Error: This deployment is supported only on Prod."
+              exit 1
+            fi
+
+          - name: This runs on release branche
+          if: ${{ startsWith(github.ref, 'refs/heads/release') }}
+          shell: bash
+          run: |
+            set -e
+            echo "Running params:"
+            echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
+            echo "Env: ${{ needs.env_check.outputs.env_name }}"
+
+            if [ ${{ needs.env_check.outputs.env_name }} = 'staging' ]
+            then
+              echo "OK: Running on Staging from demo"
+            else
+              echo "Error: This deployment is supported only on Staging."
+              exit 1
+            fi
+
+          - name: This runs on develop branch
+          if: ${{ startsWith(github.ref, 'refs/heads/develop') }}
+          shell: bash
+          run: |
+            set -e
+            echo "Running params:"
+            echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
+            echo "Env: ${{ needs.env_check.outputs.env_name }}"
+
+            if [ ${{ needs.env_check.outputs.env_name }} = 'qa' ]
+            then
+              echo "OK: Running on QA from demo"
+            else
+              echo "Error: This deployment is supported only on QA."
+              exit 1
+              
+                
+
+        - name: This runs on demo branches
+          if: ${{ startsWith(github.ref, 'refs/heads/demo') }}
+          shell: bash
+          run: |
+            set -e
+            echo "Running params:"
+            echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
+            echo "Env: ${{ needs.env_check.outputs.env_name }}"
+
+            if [ ${{ needs.env_check.outputs.env_name }} = 'qa' ]
+            then
+              echo "OK: Running on QA from demo"
+            else
+              echo "Error: This deployment is supported only on QA."
+              exit 1
+            fi
+
+    get_last_tag:
+        runs-on: ubuntu-latest
+        needs: [deployment_check,env_check]
+        permissions:
+            contents: write
+        steps:
+            - uses: actions/checkout@v4
+            - name: Get latest staging tag
+              uses: rmeneely/git-last-tag@v1
+              with:
+                tag_pattern: '${{ needs.env_check.outputs.env_name }}-v[0-9]*.[0-9]*.[0-9]*'
+            
+            - name: Print latest tag
+              run: |
+                echo ${{ env.LAST_TAG }}
