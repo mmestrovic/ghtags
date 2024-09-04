@@ -59,7 +59,7 @@ jobs:
           run: |
             echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
 
-          - name: This runs on main branch
+        - name: This runs on main branch
           if: ${{ startsWith(github.ref, 'refs/heads/main') }}
           shell: bash
           run: |
@@ -76,7 +76,7 @@ jobs:
               exit 1
             fi
 
-          - name: This runs on release branche
+        - name: This runs on release branche
           if: ${{ startsWith(github.ref, 'refs/heads/release') }}
           shell: bash
           run: |
@@ -93,7 +93,7 @@ jobs:
               exit 1
             fi
 
-          - name: This runs on develop branch
+        - name: This runs on develop branch
           if: ${{ startsWith(github.ref, 'refs/heads/develop') }}
           shell: bash
           run: |
