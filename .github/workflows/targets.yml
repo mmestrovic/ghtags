@@ -1,0 +1,104 @@
+name: Select targets
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Select an environment
+        type: choice
+        required: true
+        default: ""
+        options:
+          - qa
+          - staging
+
+      application:
+        description: Select an application
+        type: choice
+        required: true
+        default: ""
+        options:
+          - api
+          - dataextractor
+          - scheduler
+          - scrapers
+          - scrapersapi
+          - sftp
+
+  workflow_call:
+
+jobs:
+
+  env_check:
+    name: Environment check
+    runs-on: self-hosted
+    steps:
+      - name: Set deployment parameters (env_name and deploy_branch)
+        id: env_setup
+        run: |
+          echo "Running on branch ${{ github.ref }}"
+
+          if [ "${{ inputs.environment }}" = "staging" ]; then
+            echo "env_name=staging" >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.environment }}" = "qa" ]; then
+            echo "env_name=qa" >> $GITHUB_OUTPUT
+          else
+            echo "You need to select environment"
+            exit 1
+          fi
+
+      - name: Use environment setup in previous step
+        run: echo "Setting up environment ${{ steps.env_setup.outputs.env_name }}"
+
+    outputs:
+      env_name: ${{ steps.env_setup.outputs.env_name }}
+
+
+  set_targets:
+    name: Set targets
+    if: always() && !failure() && !cancelled()
+    runs-on: self-hosted
+    environment: ${{ needs.env_check.outputs.env_name }}
+    needs: [env_check]
+    steps:
+      - name: Set targets
+        id: set_tgs
+        run: |
+          targets=()
+
+          case ${{ inputs.application }} in
+
+            api | sftp)
+              targets+=(1,2)
+              ;;
+
+            scrapers | scrapersapi)
+              targets+=(3,4,5,8,9,10)
+              ;;
+
+            scheduler)
+              targets+=(7)
+              ;;
+
+            dataextractor)
+              targets+=(6,9)
+              ;;
+
+            *)
+              echo -n "unknown"
+              ;;
+          esac
+
+          echo ${targets[@]}
+          IFS=,
+          echo "${targets[*]}
+    
+          echo "targets=${targets[*]}" >> $GITHUB_OUTPUT
+    
+      - name: Setting up targets to output
+        run: |
+          set -e
+          echo "Setting up targets ${{ steps.set_tgs.outputs.targets }}"
+                 
+    outputs:
+      targets: ${{ steps.set_tgs.outputs.targets }}

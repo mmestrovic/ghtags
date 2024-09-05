@@ -19,7 +19,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
           - name: Environment check on branch
-            id: branch_check
+            id: env_setup
             run: |
               echo "Running on branch ${{ github.ref }}"
               
@@ -41,10 +41,10 @@ jobs:
                 echo "deploy_branch=undefined" >> $GITHUB_OUTPUT
               fi                  
           - name: Use environment setup in previous step
-            run: echo "Setting up environment ${{ steps.branch_check.outputs.env_name }}"
+            run: echo "Setting up environment ${{ steps.env_setup.outputs.env_name }}"
     
         outputs:
-          env_name: ${{ steps.branch_check.outputs.env_name }}
+          env_name: ${{ steps.env_setup.outputs.env_name }}
 
 
     deployment_check:
