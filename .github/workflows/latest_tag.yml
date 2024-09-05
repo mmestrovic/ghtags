@@ -53,13 +53,19 @@ jobs:
       needs: env_check
       steps:
 
-        - name: This runs on main
-          if: ${{ github.ref == 'refs/heads/main' }}
-          shell: bash
+        - uses: actions/checkout@v4
+        - name: Get latest tag
+          uses: rmeneely/git-last-tag@v1
+          with:
+            tag_pattern: '${{ needs.env_check.outputs.env_name }}-v[0-9]*.[0-9]*.[0-9]*'
+        
+        - name: Set latest tag output
+          id: tag_output
           run: |
-            echo "Running on branch ${{ github.ref }} - ${{ github.ref_name }}"
+            echo ${{ env.LAST_TAG }}
+            echo "latest_tag=${{ env.LAST_TAG }}" >> $GITHUB_OUTPUT
 
-        - name: This runs on main branch
+        - name: Main branch deployment
           if: ${{ startsWith(github.ref, 'refs/heads/main') }}
           shell: bash
           run: |
@@ -67,79 +73,67 @@ jobs:
             echo "Running params:"
             echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
             echo "Env: ${{ needs.env_check.outputs.env_name }}"
-
+  
             if [ ${{ needs.env_check.outputs.env_name }} = 'prod' ]
             then
-              echo "OK: Running on Prod from demo"
+              echo "OK: Running on Prod from main branch"
+              echo "DEPLOYMENT_REF=${{ env.LAST_TAG }}" >> $GITHUB_ENV
             else
               echo "Error: This deployment is supported only on Prod."
-              exit 1
+              #exit 1
             fi
-
-        - name: This runs on release branche
-          if: ${{ startsWith(github.ref, 'refs/heads/release') }}
+  
+        - name: Staging tags deployment
+          if: ${{ startsWith(github.ref, 'refs/tags/staging') }}
           shell: bash
           run: |
             set -e
             echo "Running params:"
             echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
             echo "Env: ${{ needs.env_check.outputs.env_name }}"
-
+  
             if [ ${{ needs.env_check.outputs.env_name }} = 'staging' ]
             then
               echo "OK: Running on Staging from demo"
+              echo "DEPLOYMENT_REF=${{ github.ref }}" >> $GITHUB_ENV
             else
               echo "Error: This deployment is supported only on Staging."
-              exit 1
+              #exit 1
             fi
-
-        - name: This runs on develop branch
-          if: ${{ startsWith(github.ref, 'refs/heads/develop') }}
-          shell: bash
-          run: |
-            set -e
-            echo "Running params:"
-            echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
-            echo "Env: ${{ needs.env_check.outputs.env_name }}"
-
-            if [ ${{ needs.env_check.outputs.env_name }} = 'qa' ]
-            then
-              echo "OK: Running on QA from demo"
-            else
-              echo "Error: This deployment is supported only on QA."
-              exit 1
-              
                 
-
-        - name: This runs on demo branches
-          if: ${{ startsWith(github.ref, 'refs/heads/demo') }}
+        - name: QA tags deployment
+          if: ${{ startsWith(github.ref, 'refs/tags/qa') }}
           shell: bash
           run: |
             set -e
             echo "Running params:"
             echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
             echo "Env: ${{ needs.env_check.outputs.env_name }}"
-
+  
             if [ ${{ needs.env_check.outputs.env_name }} = 'qa' ]
             then
-              echo "OK: Running on QA from demo"
+              echo "OK: Running on QA tags from demo"
+              echo "DEPLOYMENT_REF=${{ github.ref }}" >> $GITHUB_ENV
             else
               echo "Error: This deployment is supported only on QA."
-              exit 1
+              #exit 1
             fi
+  
+        - name: Set deployment ref
+          id: deployment_ref
+          shell: bash
+          run: |
+            echo "deployment_ref=${{ env.DEPLOYMENT_REF }}" >> $GITHUB_OUTPUT
+        
+      outputs:
+        deployment_ref: ${{ steps.deployment_ref.outputs.deployment_ref }}
 
-    get_last_tag:
-        runs-on: ubuntu-latest
-        needs: [deployment_check,env_check]
-        permissions:
-            contents: write
-        steps:
-            - uses: actions/checkout@v4
-            - name: Get latest staging tag
-              uses: rmeneely/git-last-tag@v1
-              with:
-                tag_pattern: '${{ needs.env_check.outputs.env_name }}-v[0-9]*.[0-9]*.[0-9]*'
-            
-            - name: Print latest tag
-              run: |
-                echo ${{ env.LAST_TAG }}
+    deployment:
+      name: Deployment
+      runs-on: ubuntu-latest
+      needs: [env_check,deployment_check]
+      steps:
+        - name: Print deployment ref
+          shell: bash
+          run: | 
+            echo "${{ needs.deployment_check.outputs.deployment_ref }}"
