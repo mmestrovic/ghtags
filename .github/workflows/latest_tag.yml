@@ -95,7 +95,7 @@ jobs:
             if [ ${{ needs.env_check.outputs.env_name }} = 'staging' ]
             then
               echo "OK: Running on Staging from demo"
-              echo "DEPLOYMENT_REF=${{ github.ref }}" >> $GITHUB_ENV
+              echo "DEPLOYMENT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
             else
               echo "Error: This deployment is supported only on Staging."
               #exit 1
@@ -113,7 +113,7 @@ jobs:
             if [ ${{ needs.env_check.outputs.env_name }} = 'qa' ]
             then
               echo "OK: Running on QA tags from demo"
-              echo "DEPLOYMENT_REF=${{ github.ref }}" >> $GITHUB_ENV
+              echo "DEPLOYMENT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
             else
               echo "Error: This deployment is supported only on QA."
               #exit 1
