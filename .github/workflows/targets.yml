@@ -89,9 +89,9 @@ jobs:
               ;;
           esac
 
-          echo ${targets[@]}
+          echo "${targets[@]}"
           IFS=,
-          echo "${targets[*]}
+          echo "${targets[*]}"
     
           echo "targets=${targets[*]}" >> $GITHUB_OUTPUT
     
