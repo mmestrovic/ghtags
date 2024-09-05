@@ -81,11 +81,11 @@ jobs:
               ;;
 
             dataextractor)
-              targets+=(6,9)
+              targets+=(6,11)
               ;;
 
             *)
-              echo -n "unknown"
+              exit 1
               ;;
           esac
 
