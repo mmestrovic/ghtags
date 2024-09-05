@@ -70,9 +70,7 @@ jobs:
           shell: bash
           run: |
             set -e
-            echo "Running params:"
-            echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
-            echo "Env: ${{ needs.env_check.outputs.env_name }}"
+            echo "Deployment from ${{ github.ref }} to env ${{ needs.env_check.outputs.env_name }}"
   
             if [ ${{ needs.env_check.outputs.env_name }} = 'prod' ]
             then
@@ -80,7 +78,7 @@ jobs:
               echo "DEPLOYMENT_REF=${{ env.LAST_TAG }}" >> $GITHUB_ENV
             else
               echo "Error: This deployment is supported only on Prod."
-              #exit 1
+              exit 1
             fi
   
         - name: Staging tags deployment
@@ -88,9 +86,7 @@ jobs:
           shell: bash
           run: |
             set -e
-            echo "Running params:"
-            echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
-            echo "Env: ${{ needs.env_check.outputs.env_name }}"
+            echo "Deployment from ${{ github.ref }} to env ${{ needs.env_check.outputs.env_name }}"
   
             if [ ${{ needs.env_check.outputs.env_name }} = 'staging' ]
             then
@@ -98,7 +94,7 @@ jobs:
               echo "DEPLOYMENT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
             else
               echo "Error: This deployment is supported only on Staging."
-              #exit 1
+              exit 1
             fi
                 
         - name: QA tags deployment
@@ -106,9 +102,7 @@ jobs:
           shell: bash
           run: |
             set -e
-            echo "Running params:"
-            echo "Branch:  ${{ github.ref }} - ${{ github.ref_name }}"
-            echo "Env: ${{ needs.env_check.outputs.env_name }}"
+            echo "Deployment from ${{ github.ref }} to env ${{ needs.env_check.outputs.env_name }}"
   
             if [ ${{ needs.env_check.outputs.env_name }} = 'qa' ]
             then
@@ -116,7 +110,7 @@ jobs:
               echo "DEPLOYMENT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
             else
               echo "Error: This deployment is supported only on QA."
-              #exit 1
+              exit 1
             fi
   
         - name: Set deployment ref
