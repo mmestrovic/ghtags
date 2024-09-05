@@ -31,7 +31,7 @@ jobs:
 
   env_check:
     name: Environment check
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Set deployment parameters (env_name and deploy_branch)
         id: env_setup
@@ -57,7 +57,7 @@ jobs:
   set_targets:
     name: Set targets
     if: always() && !failure() && !cancelled()
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: ${{ needs.env_check.outputs.env_name }}
     needs: [env_check]
     steps:
