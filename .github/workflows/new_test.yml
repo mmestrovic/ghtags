@@ -56,7 +56,7 @@ jobs:
           echo "OK: Deployed."
 
       - name: Prod tags deployment
-        if: ${{ startsWith(github.ref, fromJSON('["refs/tags/staging", "refs/tags/qa"]')) }}
+        if: ${{ !startsWith(github.ref, fromJSON('["refs/tags/staging", "refs/tags/qa"]')) }}
         shell: bash
         run: |
           set -e
