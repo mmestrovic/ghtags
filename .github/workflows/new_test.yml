@@ -54,16 +54,14 @@ jobs:
         run: |
           set -e
           echo "OK: Deployment from Staging or QA."
-          echo "DPLY_ACK=true" >> $GITHUB_ENV
+          exit 0
 
-      - name: Check for env value
+      - name: Deployment not from Staging or QA
+        if: ${{ ! startsWith(github.ref, 'refs/tags/staging') && ! startsWith(github.ref,'refs/tags/qa') }}
         shell: bash
         run: |
-          set -e 
-          if  
-          if [[ ! ${{ env.DPLY_ACK}} ]]; then
-            echo "DPLY_ACK not set";
-            exit 1
-          else
-            echo "Gonna deploy"
-            exit 0
+          set -e
+          echo "Error: Deployment not from Staging or QA."
+          exit 1
+
+
