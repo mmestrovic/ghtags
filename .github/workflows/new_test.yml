@@ -49,19 +49,16 @@ jobs:
     steps:
 
       - name: Deployment from Staging or QA
-        if: ${{ startsWith(github.ref, fromJSON('["refs/tags/staging", "refs/tags/qa"]')) }}
+        if: ${{ startsWith(github.ref, 'refs/tags/staging') || startsWith(github.ref,'refs/tags/qa') }}
         shell: bash
         run: |
           set -e
           echo "OK: Deployed."
 
-      - name: Prod tags deployment
-        if: ${{ !startsWith(github.ref, fromJSON('["refs/tags/staging", "refs/tags/qa"]')) }}
+      - name: Other tags/branches deployment
+        if: ! ${{ startsWith(github.ref, 'refs/tags/staging') || startsWith(github.ref,'refs/tags/qa') }}
         shell: bash
         run: |
           set -e
           echo "Error."
           exit 1
-
-
-
