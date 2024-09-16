@@ -54,7 +54,24 @@ jobs:
         run: |
           set -e
           echo "OK: Deployment from Staging or QA."
-          exit 0
+
+          github_refname="qa-v0.2.9"
+          IFS="-"
+          set $github_refname
+          env_name=$1
+
+          if [ "${{ inputs.environment }}" = "staging" ]; then
+            if $env_name != 'staging'
+            echo "Error: you are trying to deploy $env_name to staging"
+            exit 1
+          elif [ "${{ inputs.environment }}" = "qa" ]; then
+            if $env_name != 'staging'
+            echo "Error: you are trying to deploy $env_name to staging"
+            exit 1
+          else
+            echo "You need to select environment"
+            exit 0
+          fi
 
       - name: Deployment not from Staging or QA
         if: ${{ ! startsWith(github.ref, 'refs/tags/staging') && ! startsWith(github.ref,'refs/tags/qa') }}
