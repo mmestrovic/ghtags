@@ -7,6 +7,7 @@ jobs:
     get_hash:
         runs-on: ubuntu-latest
         steps:
+          - uses: actions/checkout@v4
           - name: get properties
             id: json_properties
             uses: ActionsTools/read-json-action@main
