@@ -1,0 +1,17 @@
+name: Read JSON
+
+on:
+  workflow_dispatch:
+
+jobs:
+    get_hash:
+        runs-on: ubuntu-latest
+        steps:
+          - name: get properties
+            id: json_properties
+            uses: ActionsTools/read-json-action@main
+            with:
+              file_path: "src/version.json"
+          - run: |
+              echo ${{steps.json_properties.outputs.version}}
+              echo ${{steps.json_properties.outputs.timestamp}}
