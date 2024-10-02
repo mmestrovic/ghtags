@@ -62,12 +62,12 @@ jobs:
 
           if [ "${{ inputs.environment }}" = "staging" ]; then
             if $env_name != 'staging'
-            echo "Error: you are trying to deploy $env_name to staging"
-            exit 1
+            echo "Error: you are trying to deploy wrong branch to staging"
+            exit 1 
           elif [ "${{ inputs.environment }}" = "qa" ]; then
-            if $env_name != 'staging'
-            echo "Error: you are trying to deploy $env_name to staging"
-            exit 1
+            if $env_name != 'qa'
+            echo "Error: you are trying to deploy wrong branch to staging"
+            exit 1 
           else
             echo "You need to select environment"
             exit 0
